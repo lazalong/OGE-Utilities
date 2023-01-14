@@ -30,3 +30,14 @@
 *.exe
 *.out
 *.app
+
+# lazalong ignores
+x64_Debug/
+x64_Release/
+.vs
+
+.vs/OGE Utilities/v16/.suo
+.vs/OGE Utilities/v16/Browse.VC.db
+.vs/OGE Utilities/v16/Solution.VC.db
+.vs/OGE Utilities/v16/ipch/AutoPCH/2035052ba573291d/LOGGER.ipch
+.vs/OGE Utilities/v16/ipch/AutoPCH/33dfcf718efb08e2/MAIN.ipch

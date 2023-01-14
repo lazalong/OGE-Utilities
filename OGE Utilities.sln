@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29609.76
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OGE", "oge\OGE.vcxproj", "{E82B33F0-FD51-474A-8935-0DAE9587B013}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{554E9D1E-6958-42A9-9FF7-C3D0771031CF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HelloWorld", "samples\HelloWorld\HelloWorld.vcxproj", "{65640EAE-B783-4488-8CBC-89DC15700485}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E82B33F0-FD51-474A-8935-0DAE9587B013} = {E82B33F0-FD51-474A-8935-0DAE9587B013}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{560312F8-6E47-40D8-AA03-8E82B0DD4CC6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_OGE", "_OGE", "{C796163C-DCB5-4D07-8C71-B66225B686EA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E82B33F0-FD51-474A-8935-0DAE9587B013}.Debug|x64.ActiveCfg = Debug|x64
+		{E82B33F0-FD51-474A-8935-0DAE9587B013}.Debug|x64.Build.0 = Debug|x64
+		{E82B33F0-FD51-474A-8935-0DAE9587B013}.Release|x64.ActiveCfg = Release|x64
+		{E82B33F0-FD51-474A-8935-0DAE9587B013}.Release|x64.Build.0 = Release|x64
+		{65640EAE-B783-4488-8CBC-89DC15700485}.Debug|x64.ActiveCfg = Debug|x64
+		{65640EAE-B783-4488-8CBC-89DC15700485}.Debug|x64.Build.0 = Debug|x64
+		{65640EAE-B783-4488-8CBC-89DC15700485}.Release|x64.ActiveCfg = Release|x64
+		{65640EAE-B783-4488-8CBC-89DC15700485}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E82B33F0-FD51-474A-8935-0DAE9587B013} = {C796163C-DCB5-4D07-8C71-B66225B686EA}
+		{65640EAE-B783-4488-8CBC-89DC15700485} = {554E9D1E-6958-42A9-9FF7-C3D0771031CF}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0D9F8FE6-7B1F-42FE-9208-F7CA14C3E496}
+	EndGlobalSection
+EndGlobal

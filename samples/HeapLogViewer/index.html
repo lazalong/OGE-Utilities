@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <title>Heap Log Viewer</title>
+   <meta content="text/html"; charset="utf-8" />
+   <script src="heap_logger_visualiser.js"></script>
+</head>
+<body>
+   <h1>Heap Log Viewer</h1>
+   
+   <button onClick="importData()">Import Log File</button>
+   <p></p>
+<script>
+
+   //
+   // Structure of the json log string:
+   //    fields : type    p1    p2     p3             p4      p5
+   // log entry : 'log'   time  level  file location  msg     msg2
+   // mem entry : 'mem'   time  heap   action         address size
+   //
+   // where
+   //      mem = the allocator
+   //      level = the log level with the values: 
+   //          'info', 'log', 'warn', 'error'
+   //      file location = filename + ':' + line nb  i.e.  "engine.cpp:453"
+   //      heap = the allocator numbered from 0 to 4. Aka we will only show the first 5 alloctors
+   //      action is what we asked the allocator to do, the values can be:
+   //         'add' = an allocation was requested at the 'address' with the size 'size'
+   //         'rem' = remove at 'address' with size 'size'
+   //         'clr' = clear the address (still allocated but 'empty')
+   //         'del' = delete the address aka deallocate
+   //         'err' = allocation error
+   //      address = memory address in hexadecimal
+   //      size = allocation in bytes
+   //
+   let test_log_json = '{"log":[' +
+   '{"type":"mem", "p1":"20", "p2":"0", "p3":"del" ,"p4":"1084", "p5":"10" },' +
+   '{"type":"mem", "p1":"25", "p2":"1", "p3":"del" ,"p4":"1094", "p5":"4096" },' +
+
+   '{"type":"mem", "p1":"20", "p2":"0", "p3":"del" ,"p4":"1084", "p5":"10" },' +
+   '{"type":"mem", "p1":"35", "p2":"1", "p3":"del" ,"p4":"4094", "p5":"10" },' +
+
+   '{"type":"mem", "p1":"43", "p2":"0", "p3":"add" ,"p4":"00", "p5":"64" },' +
+   '{"type":"mem", "p1":"45", "p2":"0", "p3":"rem" ,"p4":"64", "p5":"64" },' +
+
+   '{"type":"log", "p1":"59", "p2":"info", "p3":"engine.cpp:563", "p4":"Starting engine", "p5":"-" },' +
+
+   '{"type":"mem", "p1":"65", "p2":"1", "p3":"add" ,"p4":"100", "p5":"128" },' +
+   '{"type":"mem", "p1":"66", "p2":"1", "p3":"del" ,"p4":"100", "p5":"128" },' +
+
+   '{"type":"log", "p1":"70", "p2":"log", "p3":"engine.cpp:433", "p4":"Engine doing something", "p5":"OK" },' +
+   '{"type":"log", "p1":"73", "p2":"log", "p3":"allocator.cpp:432", "p4":"Display called", "p5":"Cube" },' +
+
+   '{"type":"mem", "p1":"80", "p2":"0", "p3":"add" ,"p4":"65", "p5":"20" },' +
+   '{"type":"mem", "p1":"82", "p2":"0", "p3":"clr" ,"p4":"65", "p5":"20" },' +
+
+   '{"type":"log", "p1":"83", "p2":"error", "p3":"engine.cpp:330", "p4":"Ending engine", "p5":"Divide by zero!" },' +
+
+   '{"type":"mem", "p1":"90", "p2":"0", "p3":"del" ,"p4":"200", "p5":"10" },' +
+   '{"type":"mem", "p1":"94", "p2":"1", "p3":"del" ,"p4":"200", "p5":"10" }' +
+
+   ']}';
+
+   color_alloc   = '#A9A9A9'; // DarkGrey
+   color_dealloc = '#F0DC5C'; // LightGray
+   color_clear   = '#D3D3D3'; // LightGray  // used also for background?
+   color_add     = '#FFFAF0'; // FloralWhite
+   color_remove  = '#DCDCDC'; // Gainsboro
+   color_error   = '#DC143C'; // Crimson
+
+   const maxNbHeaps = 10000;
+   
+   let nbLines = 0;
+   let nbHeaps = 0;
+   let maxHeapSizes = [];
+   let valueMax = [];
+   let scales = [];
+   let nph2 = [];
+   let files;
+   let line = 0;
+
+   obj = JSON.parse(test_log_json);
+
+   analyse_json(obj);
+
+
+   function analyse_json(json_obj) {
+      nbLines = obj.log.length;
+
+      // Analyse log for nb of heaps
+      for (let i in obj.log) {
+         if (obj.log[i].type === "mem") {
+            // Find how many allocator locations we have
+            if ((parseInt(obj.log[i].p2)+1) > nbHeaps) {
+               nbHeaps = parseInt(obj.log[i].p2) + 1;
+            }
+         }
+      }
+
+      if (nbHeaps > maxNbHeaps) {
+         alert("Too many heaps: we can only display 10 (but the code can easily be changed)");
+      }
+
+      for (let k=0; k<nbHeaps; k++)
+         maxHeapSizes[k] = 0;
+
+      
+      for (let a = 0; a <maxNbHeaps; a++)
+         valueMax[a] = 0
+
+      // Re-analyse logs for max size per heap
+      for (let i in obj.log) {
+         if (obj.log[i].type === "mem") {
+
+            heap = parseInt(obj.log[i].p2);
+         
+            let v = parseInt(obj.log[i].p4) + parseInt(obj.log[i].p5);  // address + size
+            if (v > valueMax[heap]) {
+               valueMax[heap] = v;
+            }
+         }
+      }
+      
+      for (let a = 0; a < maxNbHeaps; a++) {
+         scales[a] = 0;
+         nph2[a] = 0;
+      }
+
+      for (let k=0; k<nbHeaps; k++) {
+         scales[k] = getScaleBasedonMaxValue(valueMax[k]);
+         nph2[k] = nearestHighestPowerOf2(valueMax[k]);
+      }
+
+   }
+
+   /*
+   let text2 = "";
+   let nbLines = obj.log.length;
+   let nbHeaps = 0;
+
+   // Analyse log for nb of heaps
+   for (let i in obj.log) {
+      if (obj.log[i].type === "mem") {
+         // Find how many allocator locations we have
+         if ((parseInt(obj.log[i].p2)+1) > nbHeaps) {
+            nbHeaps = parseInt(obj.log[i].p2) + 1;
+         }
+      }
+   }
+
+   maxHeapSizes = [];
+   for (let k=0; k<nbHeaps; k++) {
+      maxHeapSizes[k] = 0;
+   }
+   
+   valueMax = [];
+   for (let a = 0; a <100; a++)
+      valueMax[a] = 0;
+
+   // Re-analyse logs for max size per heap
+   for (let i in obj.log) {
+      if (obj.log[i].type === "mem") {
+
+         heap = parseInt(obj.log[i].p2);
+      
+         let v = parseInt(obj.log[i].p4) + parseInt(obj.log[i].p5);  // address + size
+         if (v > valueMax[heap]) {
+            valueMax[heap] = v;
+         }
+      }
+   }
+
+   scales = [];
+   nph2 = [];
+   for (let a = 0; a <100; a++) {
+      scales[a] = 0;
+      nph2[a] = 0;
+   }
+
+   for (let k=0; k<nbHeaps; k++) {
+      scales[k] = getScaleBasedonMaxValue(valueMax[k]);
+      nph2[k] = nearestHighestPowerOf2(valueMax[k]);
+   }
+   let files;
+
+ */
+ 
+   function importData() {
+      let input = document.createElement('input');
+      input.type = 'file';
+      input.onchange = _ => {
+         // you can use this method to get file and perform respective operations
+         files =   Array.from(input.files);
+         const file = files[0];
+         console.log("Loading file: " + file.name);
+         let reader = new FileReader();
+
+         reader.onload = function() {
+            txt = reader.result;
+            txt = txt.replace(/\r?\n|\r/g, "");
+            obj = JSON.parse(txt);
+            line = 0;
+            analyse_json(obj);
+            nextLine();
+         }
+         reader.readAsText(file);
+      }
+      input.click();
+   }
+
+
+   function previousMemLine() {
+      for (let i=line-1; i>0; i--) {
+         if (obj.log[i].type === "mem") {
+            previousLine();
+            return;
+         }
+         previousLine();
+      }
+   }
+
+   function nextMemLine() {
+      for (let i=line; i<nbLines;i++) {
+         if (obj.log[i].type === "mem") {
+            nextLine();
+            return;
+         }
+         nextLine();
+      }
+   }
+
+   function previousLine() {
+      if (line >=2) {
+         line -= 2;
+         nextLine();
+      }
+   }
+
+   function nextLine() {
+      //debugger
+      if (++line > nbLines)
+         line = 0;
+
+      document.getElementById("line_shown").innerHTML = "Line shown: " + (line - 1);
+
+      log_string = "";
+      for (let i=0; i<line;i++) {
+         log_string += "" + i + ": ";
+         log_string += obj.log[i].type + " " + obj.log[i].p1 + " " + obj.log[i].p2
+          + " " + obj.log[i].p3 + " " + obj.log[i].p4 + " " + obj.log[i].p5;
+         log_string += "\n";
+      }
+      document.getElementById("log_text").innerHTML = log_string;
+
+      for (let m=0; m<nbHeaps; m++) {
+         document.getElementById("scale_str_" + m).innerHTML = "Size: width: 1024 - Height: 256 " 
+         + " - MaxValue: " + valueMax[m]
+         + " - Nearest Highest Power of 2: " + nph2[m]
+         + " - Scale: " + scales[m] + " bytes/pixel"
+         + " - One line: " + scales[m]*1024 + " Bytes"
+         + " - Nb of Heaps: " + nbHeaps;
+
+         drawBox("canvas_" + m, 0, 0, 1024, 256, color_clear); // Clear canvas
+      }
+
+      /* test
+      if (line == 0) drawBox("canvas_1",  0, 0, 20, 10, color_alloc);   // alloc
+      if (line == 1) drawBox("canvas_1", 20, 0, 20, 10, color_dealloc); // dealloc
+      if (line == 2) drawBox("canvas_1", 40, 0, 20, 10, color_clear);   // clear
+      if (line == 3) drawBox("canvas_1", 60, 0, 20, 10, color_add);     // add
+      if (line == 4) drawBox("canvas_1", 80, 0, 20, 10, color_remove);  // remove
+      if (line == 5) drawBox("canvas_1",100, 0, 20, 10, color_error);   // error
+      */
+  
+      // Draw all allocation until the current 'line'
+      for (let n=0; n<line;n++) {
+         if (obj.log[n].type === "mem") {
+//debugger
+            heap = parseInt(obj.log[n].p2);         
+            address = parseInt(obj.log[n].p4);
+            size = parseInt(obj.log[n].p5);
+            action = obj.log[n].p3;
+
+            color = "";
+            if (action === 'add')
+               color = color_alloc;
+            else if (action === 'rem')
+               color = color_dealloc;
+            else if (action === 'clr')
+               color = color_clear;
+            else if (action === 'del')
+               color = color_remove;
+            else if (action === 'err')
+               color = color_error;
+            else 
+               color = color_alloc;
+
+            let bytes_per_line = scales[heap]*1024;
+
+            // Find in which row the address should be
+            let address_row = Math.round(address / bytes_per_line);
+            let end_row = Math.round((address + size) / bytes_per_line);
+
+            // 'Relative address' form the start of the row 
+            let start_address = address - address_row*bytes_per_line;
+            let end_address = (address + size) - end_row*bytes_per_line;
+
+            // As each row has 1024 pixels we must divde by the nb of bytes and multip by 1024
+            let start_pixel = (start_address/bytes_per_line) * 1024;
+            let end_pixel = (end_address/bytes_per_line) * 1024;
+
+            if (Math.round(start_pixel) === Math.round(end_pixel)) 
+               end_pixel = end_pixel + 1;
+
+            // All fits in same row
+            if (address_row === end_row) {
+               drawBox("canvas_"+heap, start_pixel, address_row*10, end_pixel - start_pixel, 10, color);
+            }
+            else {
+               // Draw first row 
+               drawBox("canvas_"+heap, start_pixel, address_row*10, 1024 - start_pixel, 10, color);
+                 
+               // Draw middle rows
+               for (let i=address_row +1; i<end_row; i++){
+                  drawBox("canvas_"+heap, 0, i*10, 1024, 10, color);
+               }
+
+               // Calculate end row content
+               drawBox("canvas_"+heap, 0, end_row*10, end_pixel, 10, color);
+            }     
+         }
+      }
+   }
+</script>
+
+<button type="button" onclick="previousLine()">Previous log line</button>
+<button type="button" onclick="nextLine()">Next log line</button>
+<p></p>
+<button type="button" onclick="previousMemLine()">Previous allocation event</button>
+<button type="button" onclick="nextMemLine()">Next allocation event</button>
+<p></p>
+<p id="line_shown">Log line: 0</p>
+<textarea id="log_text" rows="4" colums="256">log</textarea>
+
+<p id="scale_str_0"></p>
+<canvas id="canvas_0" width="1024" height="256"></canvas>
+
+<p id="scale_str_1"></p>
+<canvas id="canvas_1" width="1024" height="256"></canvas>
+
+<p id="scale_str_2"></p>
+<canvas id="canvas_2" width="1024" height="256"></canvas>
+
+<p id="scale_str_3"></p>
+<canvas id="canvas_3" width="1024" height="256"></canvas>
+
+<p id="scale_str_4"></p>
+<canvas id="canvas_4" width="1024" height="256"></canvas>
+
+<p id="scale_str_5"></p>
+<canvas id="canvas_5" width="1024" height="256"></canvas>
+
+<p id="scale_str_6"></p>
+<canvas id="canvas_6" width="1024" height="256"></canvas>
+
+<p id="scale_str_7"></p>
+<canvas id="canvas_7" width="1024" height="256"></canvas>
+
+<p id="scale_str_8"></p>
+<canvas id="canvas_8" width="1024" height="256"></canvas>
+
+<p id="scale_str_9"></p>
+<canvas id="canvas_9" width="1024" height="256"></canvas>
+
+<script> 
+   nextLine();
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+   "version": "0.2.0",
+   "configurations": [
+     {
+       "type": "chrome", // "msedge",
+       "request": "launch",
+       "name": "Launch my cool app",
+       // "url": "http://localhost:8000" // needs a server
+       "file": "${workspaceFolder}/index.html"
+     }
+   ]
+ }

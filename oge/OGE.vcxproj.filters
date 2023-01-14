@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="oge">
+      <UniqueIdentifier>{9b3d6da5-f270-433f-9af9-cae6bc2050da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oge\Utilities">
+      <UniqueIdentifier>{f9d62c26-4e9b-4509-a438-2c7ed3834618}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oge\Input">
+      <UniqueIdentifier>{49d7133b-cd67-4f50-a024-b5184b42e291}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oge\System">
+      <UniqueIdentifier>{7a23bd2c-5d36-4e18-aaa3-265f26ad325f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oge\Config">
+      <UniqueIdentifier>{2969fde5-c377-4dc0-a75b-a9497946c8ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oge\Engine">
+      <UniqueIdentifier>{a4b0fb13-4fd1-4b83-846c-66a9ed803787}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oge\Utilities\stb">
+      <UniqueIdentifier>{4f9b00dd-62f1-4d6d-895a-bd4b8aaaae5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oge\Plugin">
+      <UniqueIdentifier>{8a12b93b-4476-47ee-92fb-4fe1f496f8cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oge\Platform">
+      <UniqueIdentifier>{40840008-5431-4877-8660-3e077fdd57ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oge\Graphics">
+      <UniqueIdentifier>{0763a991-9c24-4fdc-b29f-1cfb2a56c525}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="oge\Oge.h">
+      <Filter>oge</Filter>
+    </ClInclude>
+    <ClInclude Include="oge\utilities\Logger.h">
+      <Filter>oge\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="oge\utilities\Memory.h">
+      <Filter>oge\Utilities</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="oge\utilities\Logger.cpp">
+      <Filter>oge\Utilities</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
