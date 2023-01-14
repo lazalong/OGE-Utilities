@@ -6,7 +6,7 @@ This project illustrate the logger, memory allocator, leak detecor and a javascr
 Happy to receive any suggestion, fix or improvement.
 
 
-![oge.cpp icon](HeapLogVisualier.png.png)
+![HeapLogVisualier.png icon](HeapLogVisualier.png)
 
 ## Features
 
