@@ -27,5 +27,5 @@ Happy to receive any suggestion, fix or improvement.
 ## Installation
 
  - OGE.lib : Open the Visual Studio solution to compile the static lib
- - Heap log visualier: Open the Visual Code solution to see the code. But you only need to open the file index.html and load a .json log file
+ - Heap log visualiser: Open the Visual Code solution to see the code. But you only need to open the file index.html and load a .json log file
 
